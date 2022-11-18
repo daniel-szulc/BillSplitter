@@ -1,5 +1,4 @@
 -module(splitter).
--author("Daniel").
 
 -export([splitBill/3]).
 
@@ -8,11 +7,11 @@ split1(Array, N, M, J, X)  when J < N ->
   V1=array_2d:get(X,Y,Array),
   V2=array_2d:get(Y,X,Array),
   Diff = V1-V2,
-
+  io:fwrite("Analizowanie indeksu X: ~p  |  Y: ~p\n",[X,Y]),
   Array2 = if
              Diff<0 ->
                Array1 = array_2d:set(X,Y,0,Array),
-               array_2d:set(Y,X,Diff,Array1);
+               array_2d:set(Y,X,abs(Diff),Array1);
              Diff>0 ->
                Array1 = array_2d:set(X,Y,Diff,Array),
                array_2d:set(Y,X,0,Array1);
