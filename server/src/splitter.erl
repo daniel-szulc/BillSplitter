@@ -7,7 +7,6 @@ split1(Array, N, M, J, X)  when J < N ->
   V1=array_2d:get(X,Y,Array),
   V2=array_2d:get(Y,X,Array),
   Diff = V1-V2,
-  io:fwrite("Analizowanie indeksu X: ~p  |  Y: ~p\n",[X,Y]),
   Array2 = if
              Diff<0 ->
                Array1 = array_2d:set(X,Y,0,Array),
@@ -30,8 +29,6 @@ split(Array, N, M, I) when I /= N-1 ->
 
 split(Array,_,_,_) ->
   Array.
-
-
 
 splitBill(Array, N, M) ->
   split(Array,N,M,0).
