@@ -1,0 +1,19 @@
+<h1>Rachunki</h1>
+
+<%= for bill <- @bills do %>
+<h2><%= bill.title %></h2><%= bill.users %>
+<p style="color:red;"><%= bill.price  %></p>
+
+<hr>
+        <% end %>
+
+<%= form_for @changeset, Routes.bills_path(@conn, :create), fn f -> %>
+
+<label>
+    Nowy rachunek: <%= text_input f, :title, placeholder: 'Nazwa rachunku' %>
+    <%= text_input f, :users, placeholder: 'Osoby do podzialu' %>
+    <%= text_input f, :price, placeholder: 'Kwota' %>
+</label>
+
+        <%= submit "Dodaj" %>
+<% end %>
