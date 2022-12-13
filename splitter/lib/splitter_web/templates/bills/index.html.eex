@@ -1,19 +1,87 @@
+
+<h1>Osoby</h1>
+
+
+<div class="row">
+
+    <%= if @users do %>
+    <div class="column">
+    <%= for user <- @users do %>
+    <%= if user do %>
+    <div class="row">
+    <div class="column">
+        <h2><%= user %></h2>
+    </div>
+
+    <div class="column">
+        <%= link to: Routes.bills_path(@conn , :trashUser_button, user), method: "DELETE", class: "btn btn-primary" do %>
+        <button type="button" style="vertical-align: middle;"><%= Bootstrap.Icons.trash_fill() %>
+
+        </button>
+        <% end %>
+    </div>
+    </div>
+    <% end %>
+    <% end %>
+    </div>
+    <% end %>
+
+    <div class="column">
+        <%= form_for @changeset, Routes.bills_path(@conn, :createUser), fn f -> %>
+
+        <label>
+            Nowa osoba: <%= text_input f, :user, placeholder: 'Nazwa' %>
+        </label>
+
+        <%= submit "Dodaj" %>
+         <% end %>
+    </div>
+
+</div>
+<hr>
+
+<%= if @users do %>
 <h1>Rachunki</h1>
 
+<%= if @bills do %>
 <%= for bill <- @bills do %>
-<h2><%= bill.title %></h2><%= bill.users %>
-<p style="color:red;"><%= bill.price  %></p>
+<%= if bill do %>
+<div class="row">
+    <div class="column">
 
-<hr>
+    <h2><%= Enum.at(bill,0) %></h2><%= Enum.at(bill,1) %>
+<p style="color:red;"><%= Enum.at(bill,2)  %></p>
+        <p style="color:green;"><%= Enum.at(bill,3)  %></p>
+
+    </div>
+    <div class="column" style="width:10%">
+        <%= link to: Routes.bills_path(@conn, :trash_button, Enum.at(bill,3)), method: "DELETE", class: "btn btn-primary" do %>
+        <button type="button" style="vertical-align: middle;"><%= Bootstrap.Icons.trash_fill() %>
+
+        </button>
         <% end %>
+
+    </div>
+
+</div>
+<hr>
+<% end %>
+<% end %>
+<% end %>
+
 
 <%= form_for @changeset, Routes.bills_path(@conn, :create), fn f -> %>
 
 <label>
     Nowy rachunek: <%= text_input f, :title, placeholder: 'Nazwa rachunku' %>
-    <%= text_input f, :users, placeholder: 'Osoby do podzialu' %>
+
+    <%= for user <- @users do %>
+    <%= if user do %>
+    <%= checkbox f, :"checkbox_#{user}", value: user,  id: "checkbox-#{user}"  %> <%= user %>
+    <% end %>
+    <% end %>
     <%= text_input f, :price, placeholder: 'Kwota' %>
 </label>
-
         <%= submit "Dodaj" %>
+<% end %>
 <% end %>

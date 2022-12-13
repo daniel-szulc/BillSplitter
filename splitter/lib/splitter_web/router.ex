@@ -17,8 +17,12 @@ defmodule SplitterWeb.Router do
   scope "/", SplitterWeb do
     pipe_through :browser
 
-    get "/bills", BillsController, :index
+    get "/", BillsController, :index
     post "/bills", BillsController, :create
+    post "/users", BillsController, :createUser
+    delete "/bills/delete/:id", BillsController, :trash_button
+    delete "/users/delete/:id", BillsController, :trashUser_button
+
     #get "/", PageController, :index
   end
 

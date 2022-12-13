@@ -7,10 +7,14 @@ defmodule Splitter.Bills do
     Repo.get(Bill, id)
   end
 
-  def list_bills() do
-    query = Bill |> order_by(desc: :id)
-    Repo.all(query)
+  def list_bills(conn) do
+
   end
+
+#  def list_bills() do
+#    query = Bill |> order_by(desc: :id)
+#    Repo.all(query)
+#  end
 
   def delete_bill(id) do
     bill = Repo.get(Bill, id)
@@ -20,6 +24,5 @@ defmodule Splitter.Bills do
   def create_bill(params) do
     %Bill{}
     |> Bill.changeset(params)
-    |> Repo.insert()
   end
 end

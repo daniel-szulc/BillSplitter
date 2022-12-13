@@ -47,8 +47,11 @@ defmodule Splitter.MixProject do
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.18"},
+      {:plug, "~> 1.10"},
       {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"}
+      {:plug_cowboy, "~> 2.5"},
+        {:bootstrap_icons, "~> 0.3.0"},
+          {:cowboy, "~> 2.0"}
     ]
   end
 

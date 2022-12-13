@@ -10,6 +10,9 @@ defmodule SplitterWeb.Endpoint do
     signing_salt: "ym4289+U"
   ]
 
+
+
+
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
@@ -43,8 +46,9 @@ defmodule SplitterWeb.Endpoint do
     pass: ["*/*"],
     json_decoder: Phoenix.json_library()
 
+  plug Plug.Session,@session_options
+
   plug Plug.MethodOverride
   plug Plug.Head
-  plug Plug.Session, @session_options
   plug SplitterWeb.Router
 end
