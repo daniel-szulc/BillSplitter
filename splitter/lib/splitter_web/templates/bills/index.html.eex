@@ -94,3 +94,9 @@
         <%= submit "Dodaj" %>
 <% end %>
 <% end %>
+
+<%= link to: Routes.bills_path(@conn, :createArray), method: "GET", class: "btn btn-primary" do %>
+<button type="button" style="vertical-align: middle;"> Create Array TEST
+
+</button>
+        <% end %>

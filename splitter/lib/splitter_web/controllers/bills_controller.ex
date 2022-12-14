@@ -129,18 +129,28 @@ defmodule SplitterWeb.BillsController do
     redirect(conn, to: "/")
   end
 
-  def createArray(conn) do
-    users = getUsers(conn);
-    bills = getBills(conn);
+  def createArray(conn, param) do
+    users = getUsers(conn)
+    bills = getBills(conn)
 
-    indexes = length(users);
+    indexes = length(users)
 
-    row = Enum.map(1..indexes, fn 0 end)
-    array = Enum.map(1..indexes, fn row end)
+    row = List.duplicate(0, indexes)
+    array = List.duplicate(row, indexes)
 
-
+    new_array =  Enum.map(bills, fn bill ->
+            payer = Enum.at(bill,4)
+            index = Enum.find_index(users, fn user -> to_string(user) == to_string(payer) end)
+            value = Enum.at(bill,1)
+           # put_elem(array, index, value)
+           # put_in(arr, [1, 1], 99)
+            Enum.map(Enum.at(bill,2), fn user ->
+            # Sprawdzic ile jest do podzialu
+                                  elem(user, 1) == "true" end)
+        end)
 
     ##
+
     ##
 
     ##
