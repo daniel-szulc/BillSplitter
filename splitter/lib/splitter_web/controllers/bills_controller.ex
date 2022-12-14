@@ -11,6 +11,11 @@ defmodule SplitterWeb.BillsController do
 
     #bills = Bills.list_bills(conn)
     bills = getBillsForIndex(conn)
+
+    #billXd= Enum.at(Enum.at(bills,0),2)
+    #Logger.info billXd
+    #Logger.info Enum.at(billXd,1)
+
     users = getUsersForIndex(conn)
     changeset = Bill.changeset(%Bill{}, %{})
     render(conn, "index.html", bills: bills, users: users, changeset: changeset)
@@ -56,6 +61,8 @@ defmodule SplitterWeb.BillsController do
     end
     binary = :erlang.term_to_binary(newList)
     conn = put_session(conn, "users", binary)
+
+
 
     redirect(conn, to: "/")
   end
@@ -122,16 +129,64 @@ defmodule SplitterWeb.BillsController do
     redirect(conn, to: "/")
   end
 
+  def createArray(conn) do
+    users = getUsers(conn);
+    bills = getBills(conn);
+
+    indexes = length(users);
+
+    row = Enum.map(1..indexes, fn 0 end)
+    array = Enum.map(1..indexes, fn row end)
+
+
+
+    ##
+    ##
+
+    ##
+
+    ##
+
+    ##
+
+    ##
+
+    ###
+    ##
+    ##
+
+    ##
+
+
+
+
+    redirect(conn, to: "/")
+  end
+
+
   def create(conn, %{"bill" => bill_params}) do
 
     Logger.info "New Bill"
 
     title = bill_params["title"]
     price = bill_params["price"]
+    payer = bill_params["payer"]
     users = getUsers(conn)
 
-    checkboxes = Enum.map(users, fn user -> Map.get(bill_params, "checkbox_#{user}") end)
+    checkboxes = Enum.map(users, fn user ->Map.get(bill_params, "checkbox_#{user}") end)
+#
+#    checkboxes = Enum.map(users, fn user ->
+#      Logger.info Map.get(bill_params, "checkbox_#{user}")
+#      case (Map.get(bill_params, "checkbox_#{user}")) do
+#           true -> user;
+#            _ -> ""
+#           end
+#    end)
+
+    Logger.info Enum.zip(users, checkboxes)
+
     Logger.info checkboxes
+    Logger.info Enum.at(checkboxes,1)
    # users = bill_params["users"]
 
     bills = getBills(conn)
@@ -146,7 +201,7 @@ defmodule SplitterWeb.BillsController do
     end
     end
 
-    new_bill = [title, price, users, id]
+    new_bill = [title, price,  Enum.zip(users, checkboxes),  id, payer]
 
     newList = case bills do
       nil->[new_bill];
