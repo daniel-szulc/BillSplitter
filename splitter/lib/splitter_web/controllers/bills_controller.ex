@@ -6,15 +6,11 @@ defmodule SplitterWeb.BillsController do
   alias Splitter.Bills.Bill
   import Plug.Conn
   import Ecto.Query
+  import Kernel
 
   def index(conn, _params) do
 
-    #bills = Bills.list_bills(conn)
     bills = getBillsForIndex(conn)
-
-    #billXd= Enum.at(Enum.at(bills,0),2)
-    #Logger.info billXd
-    #Logger.info Enum.at(billXd,1)
 
     users = getUsersForIndex(conn)
     changeset = Bill.changeset(%Bill{}, %{})
@@ -111,6 +107,15 @@ defmodule SplitterWeb.BillsController do
     end
   end
 
+  def string_to_num(string) do
+    try do
+      String.to_integer(string)
+    rescue
+      ArgumentError -> String.to_float(string)
+    end
+  end
+
+
   def createUser(conn, %{"bill" => user_params}) do
     Logger.info "New User"
     Logger.info user_params
@@ -129,6 +134,40 @@ defmodule SplitterWeb.BillsController do
     redirect(conn, to: "/")
   end
 
+
+
+    def calcArrayBills(-1,_,_,array) do array end
+
+    def calcArrayBills(n, bills,users,array) do
+      bill = Enum.at(bills,n)
+    payer = Enum.at(bill,4)
+    payerIndex = Enum.find_index(users, fn user -> to_string(user) == to_string(payer) end)
+    value = Enum.at(bill,1)
+    countUsers= Enum.count(Enum.at(bill,2), &(elem(&1, 1) == "true"))
+    splitValue= string_to_num(value)/countUsers
+    newArray = calcArrayUsers(length(Enum.at(bill,2))-1, Enum.at(bill,2), users, payerIndex,splitValue, array)
+    calcArrayBills(n-1, bills,users,newArray)
+  end
+
+
+    def calcArrayUsers(-1, _,_,_,_,array) do array end
+
+    def calcArrayUsers(n, bill, users, payerIndex,splitValue, array) do
+        billUser =  Enum.at(bill,n)
+        if elem(billUser, 1) == "true" do
+
+          index = Enum.find_index(users, fn user -> to_string(user) == to_string(elem(billUser, 0)) end)
+        #  IO.inspect(to_string(elem(billUser, 0)) <> " {" <> to_string(index) <> "} " <> "wisi " <> "index:" <> to_string(payerIndex) <> " kwota:" <> to_string(splitValue))
+         # IO.inspect("payerIndex (col): " <> to_string(payerIndex) <> "  index (row): "<> to_string(index) <>  " current value: " <> to_string(Enum.at(Enum.at(array,index),payerIndex)) <>  " add value: " <> to_string(splitValue))
+          new_array =  List.replace_at(array, payerIndex, List.replace_at(Enum.at(array,payerIndex), index,  Enum.at(Enum.at(array,payerIndex),index) + splitValue))
+          calcArrayUsers(n-1, bill, users, payerIndex, splitValue, new_array)
+          else
+        calcArrayUsers(n-1, bill, users, payerIndex, splitValue, array)
+      end
+  end
+
+
+
   def createArray(conn, param) do
     users = getUsers(conn)
     bills = getBills(conn)
@@ -137,39 +176,15 @@ defmodule SplitterWeb.BillsController do
 
     row = List.duplicate(0, indexes)
     array = List.duplicate(row, indexes)
-
-    new_array =  Enum.map(bills, fn bill ->
-            payer = Enum.at(bill,4)
-            index = Enum.find_index(users, fn user -> to_string(user) == to_string(payer) end)
-            value = Enum.at(bill,1)
-           # put_elem(array, index, value)
-           # put_in(arr, [1, 1], 99)
-            Enum.map(Enum.at(bill,2), fn user ->
-            # Sprawdzic ile jest do podzialu
-                                  elem(user, 1) == "true" end)
-        end)
-
-    ##
-
-    ##
-
-    ##
-
-    ##
-
-    ##
-
-    ##
-
-    ###
-    ##
-    ##
-
-    ##
-
-
-
-
+    result= calcArrayBills(length(bills)-1, bills,users,array)
+    IO.inspect("ARRAY RESULT: ")
+    IO.inspect(result)
+    list_string = inspect(result)
+    list_string = String.replace(list_string, "], [", ";")
+    list_string = String.replace(list_string, "]]", "")
+    list_string = String.replace(list_string, "[[", "")
+    list_string = String.replace(list_string, " ", "")
+    IO.inspect(list_string)
     redirect(conn, to: "/")
   end
 
@@ -184,20 +199,6 @@ defmodule SplitterWeb.BillsController do
     users = getUsers(conn)
 
     checkboxes = Enum.map(users, fn user ->Map.get(bill_params, "checkbox_#{user}") end)
-#
-#    checkboxes = Enum.map(users, fn user ->
-#      Logger.info Map.get(bill_params, "checkbox_#{user}")
-#      case (Map.get(bill_params, "checkbox_#{user}")) do
-#           true -> user;
-#            _ -> ""
-#           end
-#    end)
-
-    Logger.info Enum.zip(users, checkboxes)
-
-    Logger.info checkboxes
-    Logger.info Enum.at(checkboxes,1)
-   # users = bill_params["users"]
 
     bills = getBills(conn)
 
