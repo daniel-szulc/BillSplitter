@@ -2,7 +2,7 @@
 -export([start/0, start/1]).
 -define(TIMEOUT, 20000).
 start() ->
-  start(5000).
+  start(5200).
 
 start(Port) ->
   io:fwrite("Server started on port ~p | http://localhost:~p/", [Port, Port] ),
