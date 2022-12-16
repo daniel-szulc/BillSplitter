@@ -1,10 +1,13 @@
 defmodule SplitterWeb.BillsController do
   use SplitterWeb, :controller
+
+  use Phoenix.LiveView
   require Logger
 
   alias Splitter.Bills
   alias Splitter.Bills.Bill
   import Plug.Conn
+
   import Ecto.Query
   import Kernel
 
@@ -14,6 +17,9 @@ defmodule SplitterWeb.BillsController do
 
     users = getUsersForIndex(conn)
     changeset = Bill.changeset(%Bill{}, %{})
+
+
+
     render(conn, "index.html", bills: bills, users: users, changeset: changeset)
   end
 
@@ -41,26 +47,41 @@ defmodule SplitterWeb.BillsController do
 
   def trashUser_button(conn, %{"id" => id}) do
 
-    users = getUsersForIndex(conn)
 
-    selectedObj = Enum.find_index(users, fn user -> to_string(user) == to_string(id) end)
+    bills = getBills(conn)
 
-    newList = case selectedObj do
-      nil ->
-        users
+    value_exists = Enum.any?(bills, fn bill -> Enum.any?(Enum.at(bill,2), fn users ->  users == {id, "true"} end) end)  ||  Enum.any?(bills, fn bill -> Enum.at(bill,4)== id end)
+
+    case value_exists do
+      true ->
+        conn = Phoenix.Controller.put_flash(conn, :alert, "Nie można usunąć osoby " <> id <> ", ponieważ istnieje rachunek powiązany!")
+        Phoenix.Controller.redirect(conn, to: "/")
       _ ->
-        List.delete_at(users, selectedObj)
+        users = getUsersForIndex(conn)
+
+        selectedObj = Enum.find_index(users, fn user -> to_string(user) == to_string(id) end)
+
+        newList = case selectedObj do
+          nil ->
+            users
+          _ ->
+            List.delete_at(users, selectedObj)
+        end
+        newList = case length(newList) do
+          0 -> nil
+          _-> newList
+        end
+        binary = :erlang.term_to_binary(newList)
+
+
+
+        conn = put_session(conn, "users", binary)
+
+        Phoenix.Controller.redirect(conn, to: "/")
+
     end
-    newList = case length(newList) do
-      0 -> nil
-      _-> newList
-    end
-    binary = :erlang.term_to_binary(newList)
-    conn = put_session(conn, "users", binary)
 
 
-
-    redirect(conn, to: "/")
   end
 
   def trash_button(conn, %{"id" => id}) do
@@ -80,7 +101,7 @@ defmodule SplitterWeb.BillsController do
     binary = :erlang.term_to_binary(newList)
     conn = put_session(conn, "bills", binary)
 
-    redirect(conn, to: "/")
+    Phoenix.Controller.redirect(conn, to: "/")
   end
 
   def getBills(conn) do
@@ -131,7 +152,7 @@ defmodule SplitterWeb.BillsController do
     binary = :erlang.term_to_binary(newList)
     conn = put_session(conn, "users", binary)
 
-    redirect(conn, to: "/")
+    Phoenix.Controller.redirect(conn, to: "/")
   end
 
 
@@ -149,22 +170,23 @@ defmodule SplitterWeb.BillsController do
     calcArrayBills(n-1, bills,users,newArray)
   end
 
-
     def calcArrayUsers(-1, _,_,_,_,array) do array end
 
     def calcArrayUsers(n, bill, users, payerIndex,splitValue, array) do
         billUser =  Enum.at(bill,n)
-        if elem(billUser, 1) == "true" do
 
+        if elem(billUser, 1) == "true" do
           index = Enum.find_index(users, fn user -> to_string(user) == to_string(elem(billUser, 0)) end)
-        #  IO.inspect(to_string(elem(billUser, 0)) <> " {" <> to_string(index) <> "} " <> "wisi " <> "index:" <> to_string(payerIndex) <> " kwota:" <> to_string(splitValue))
-         # IO.inspect("payerIndex (col): " <> to_string(payerIndex) <> "  index (row): "<> to_string(index) <>  " current value: " <> to_string(Enum.at(Enum.at(array,index),payerIndex)) <>  " add value: " <> to_string(splitValue))
           new_array =  List.replace_at(array, payerIndex, List.replace_at(Enum.at(array,payerIndex), index,  Enum.at(Enum.at(array,payerIndex),index) + splitValue))
+          #  IO.inspect(to_string(elem(billUser, 0)) <> " {" <> to_string(index) <> "} " <> "wisi " <> "index:" <> to_string(payerIndex) <> " kwota:" <> to_string(splitValue))
+          # IO.inspect("payerIndex (col): " <> to_string(payerIndex) <> "  index (row): "<> to_string(index) <>  " current value: " <> to_string(Enum.at(Enum.at(array,index),payerIndex)) <>  " add value: " <> to_string(splitValue))
+
           calcArrayUsers(n-1, bill, users, payerIndex, splitValue, new_array)
           else
         calcArrayUsers(n-1, bill, users, payerIndex, splitValue, array)
       end
   end
+
 
 
 
@@ -185,13 +207,11 @@ defmodule SplitterWeb.BillsController do
     list_string = String.replace(list_string, "[[", "")
     list_string = String.replace(list_string, " ", "")
     IO.inspect(list_string)
-    redirect(conn, to: "/")
+    Phoenix.Controller.redirect(conn, to: "/")
   end
 
 
   def create(conn, %{"bill" => bill_params}) do
-
-    Logger.info "New Bill"
 
     title = bill_params["title"]
     price = bill_params["price"]
@@ -199,6 +219,19 @@ defmodule SplitterWeb.BillsController do
     users = getUsers(conn)
 
     checkboxes = Enum.map(users, fn user ->Map.get(bill_params, "checkbox_#{user}") end)
+
+
+    usersToSplit = Enum.zip(users, checkboxes)
+
+
+    anySelected = Enum.any?(usersToSplit, fn user ->  elem(user,1) ==  "true" end)
+
+    usersToSplit = case anySelected do
+      false ->
+        index = Enum.find_index(usersToSplit, fn user ->  elem(user,0) == payer end)
+        List.replace_at(usersToSplit, index, {payer ,"true"})
+        _-> usersToSplit
+    end
 
     bills = getBills(conn)
 
@@ -212,7 +245,7 @@ defmodule SplitterWeb.BillsController do
     end
     end
 
-    new_bill = [title, price,  Enum.zip(users, checkboxes),  id, payer]
+    new_bill = [title, price,  usersToSplit,  id, payer]
 
     newList = case bills do
       nil->[new_bill];
@@ -222,7 +255,7 @@ defmodule SplitterWeb.BillsController do
     binary = :erlang.term_to_binary(newList)
     conn = put_session(conn, "bills", binary)
 
-    redirect(conn, to: "/")
+    Phoenix.Controller.redirect(conn, to: "/")
   end
 
 end

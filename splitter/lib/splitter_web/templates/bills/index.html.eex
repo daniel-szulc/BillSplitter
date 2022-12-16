@@ -1,6 +1,32 @@
 
-<h1>Osoby</h1>
+<%= if flash = get_flash(@conn, :alert) do %>
+<div class="alert" style="color:red; font-weight: 600; text-align:center"><%= flash %></div>
+<hr>
+<% end %>
 
+<%= if @users do %>
+<%= form_for @changeset, Routes.bills_path(@conn, :create), fn f -> %>
+
+<label>
+    Nowy rachunek:
+    <div style="font-weight: 100; font-size: x-small;">Nazwa rachunku:</div> <%= text_input f, :title, placeholder: 'Nazwa rachunku' %>
+    <div style="font-weight: 100; font-size: x-small;">Osoby do podziału:</div>
+    <%= for user <- @users do %>
+    <%= if user do %>
+    <%= checkbox f, :"checkbox_#{user}", value: user,  id: "checkbox-#{user}", checked: "checked"  %> <%= user %>
+    <% end %>
+    <% end %>
+    <div style="font-weight: 100; font-size: x-small;">Kwota:</div>
+    <%= number_input f, :price, placeholder: 'Kwota', step: '0.01', required: "required" %>
+    <div style="font-weight: 100; font-size: x-small;">Opłacający:</div>
+    <%= select f, :payer, @users %>
+</label>
+<%= submit "Dodaj" %>
+<% end %>
+<hr>
+
+<h1>Osoby</h1>
+<% end %>
 
 <div class="row">
 
@@ -15,7 +41,7 @@
 
     <div class="column">
         <%= link to: Routes.bills_path(@conn , :trashUser_button, user), method: "DELETE", class: "btn btn-primary" do %>
-        <button type="button" style="vertical-align: middle;"><%= Bootstrap.Icons.trash_fill() %>
+        <button type="button" class="trash-btn" ><%= Bootstrap.Icons.trash_fill() %>
 
         </button>
         <% end %>
@@ -38,30 +64,39 @@
     </div>
 
 </div>
+
 <hr>
 
 <%= if @users do %>
-<h1>Rachunki</h1>
+
 
 <%= if @bills do %>
+<h1>Rachunki</h1>
 <%= for bill <- @bills do %>
 <%= if bill do %>
 <div class="row">
     <div class="column">
 
     <h2><%= Enum.at(bill,0) %>
-    </h2>Kwota: <%= Enum.at(bill,1) %>
+    </h2>Kwota: <div  class="text-frame" ><%= Enum.at(bill,1) %>   </div>
         <div style="color:red;">   Osoby do podziału:
         <%= for user <- Enum.at(bill,2) do %>
-        <%= if(elem(user, 1) == "true", do: elem(user, 0), else: '') %>        <% end %>
+        <%= if(elem(user, 1) == "true") do %>
+            <div  class="text-frame" >
+                <%=  elem(user, 0)%>
+            </div>
+            <%  else %>
+             <% '' %>
+            <% end %>
+         <% end %>
     </div>
-        <div style="color:blue;"> Opłacający: <%= Enum.at(bill,4)  %></div>
+        <div style="color:blue;"> Opłacający:  <div  class="text-frame" ><%= Enum.at(bill,4)  %>   </div></div>
         <div style="color:green;"> ID: <%= Enum.at(bill,3)  %></div>
 
     </div>
     <div class="column" style="width:10%">
         <%= link to: Routes.bills_path(@conn, :trash_button, Enum.at(bill,3)), method: "DELETE", class: "btn btn-primary" do %>
-        <button type="button" style="vertical-align: middle;"><%= Bootstrap.Icons.trash_fill() %>
+        <button type="button" class="trash-btn" ><%= Bootstrap.Icons.trash_fill() %>
 
         </button>
         <% end %>
@@ -75,28 +110,4 @@
 <% end %>
 
 
-<%= form_for @changeset, Routes.bills_path(@conn, :create), fn f -> %>
-
-<label>
-    Nowy rachunek:
-    <div style="font-weight: 100; font-size: x-small;">Nazwa rachunku:</div> <%= text_input f, :title, placeholder: 'Nazwa rachunku' %>
-    <div style="font-weight: 100; font-size: x-small;">Osoby do podziału:</div>
-    <%= for user <- @users do %>
-    <%= if user do %>
-    <%= checkbox f, :"checkbox_#{user}", value: user,  id: "checkbox-#{user}"  %> <%= user %>
-    <% end %>
-    <% end %>
-    <div style="font-weight: 100; font-size: x-small;">Kwota:</div>
-    <%= number_input f, :price, placeholder: 'Kwota', step: '0.01' %>
-    <div style="font-weight: 100; font-size: x-small;">Opłacający:</div>
-    <%= select f, :payer, @users %>
-</label>
-        <%= submit "Dodaj" %>
 <% end %>
-<% end %>
-
-<%= link to: Routes.bills_path(@conn, :createArray), method: "GET", class: "btn btn-primary" do %>
-<button type="button" style="vertical-align: middle;"> Create Array TEST
-
-</button>
-        <% end %>
