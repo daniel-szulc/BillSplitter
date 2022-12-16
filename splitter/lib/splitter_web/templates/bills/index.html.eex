@@ -4,6 +4,20 @@
 <hr>
 <% end %>
 
+
+<%= if @bills do %>
+<%= if flash = get_flash(@conn, :splitResult) do %>
+<div><%= flash %></div>
+<hr>
+<% end %>
+<div style="text-align:center">
+<%= link to: Routes.bills_path(@conn, :splitBills), method: :get, class: "btn btn-primary" do %>
+<button type="button">Oblicz
+</button>
+<% end %>
+</div>
+<hr>
+<% end %>
 <%= if @users do %>
 <%= form_for @changeset, Routes.bills_path(@conn, :create), fn f -> %>
 

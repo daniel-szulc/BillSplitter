@@ -3,11 +3,11 @@ defmodule SplitterWeb.BillsController do
 
   use Phoenix.LiveView
   require Logger
-
+  use GenServer
   alias Splitter.Bills
   alias Splitter.Bills.Bill
   import Plug.Conn
-
+  import HTTPoison
   import Ecto.Query
   import Kernel
 
@@ -21,6 +21,20 @@ defmodule SplitterWeb.BillsController do
 
 
     render(conn, "index.html", bills: bills, users: users, changeset: changeset)
+  end
+
+  def start_link do
+    HTTPoison.start_link()
+  end
+
+  def get_request(url) do
+    Logger.info url
+
+    res = HTTPoison.get!(url)
+    Logger.info res.body
+    Logger.info res
+
+    res
   end
 
   def getBillsForIndex(conn) do
@@ -187,10 +201,19 @@ defmodule SplitterWeb.BillsController do
       end
   end
 
+  def splitBills(conn, params) do
+
+    list_string = createArray(conn)
+    response = get_request("http://localhost:4100/" <> list_string)
+    Logger.info response
+    Logger.info response
+    IO.inspect(response)
+    conn = Phoenix.Controller.put_flash(conn, :splitResult, response)
+    Phoenix.Controller.redirect(conn, to: "/")
+  end
 
 
-
-  def createArray(conn, param) do
+  def createArray(conn) do
     users = getUsers(conn)
     bills = getBills(conn)
 
@@ -206,8 +229,7 @@ defmodule SplitterWeb.BillsController do
     list_string = String.replace(list_string, "]]", "")
     list_string = String.replace(list_string, "[[", "")
     list_string = String.replace(list_string, " ", "")
-    IO.inspect(list_string)
-    Phoenix.Controller.redirect(conn, to: "/")
+    list_string
   end
 
 

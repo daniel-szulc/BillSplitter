@@ -20,7 +20,7 @@ defmodule SplitterWeb.Router do
     get "/", BillsController, :index
     post "/bills", BillsController, :create
     post "/users", BillsController, :createUser
-    get "/array", BillsController, :createArray
+    get "/split", BillsController, :splitBills
     delete "/bills/delete/:id", BillsController, :trash_button
     delete "/users/delete/:id", BillsController, :trashUser_button
 
