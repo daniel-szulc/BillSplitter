@@ -9,16 +9,16 @@
 
 <label>
     Nowy rachunek:
-    <div style="font-weight: 100; font-size: x-small;">Nazwa rachunku:</div> <%= text_input f, :title, placeholder: 'Nazwa rachunku' %>
-    <div style="font-weight: 100; font-size: x-small;">Osoby do podziału:</div>
+    <div style="font-size: x-small;">Nazwa rachunku:</div> <%= text_input f, :title, placeholder: 'Nazwa rachunku' %>
+    <div style=" font-size: x-small;">Osoby do podziału:</div>
     <%= for user <- @users do %>
     <%= if user do %>
     <%= checkbox f, :"checkbox_#{user}", value: user,  id: "checkbox-#{user}", checked: "checked"  %> <%= user %>
     <% end %>
     <% end %>
-    <div style="font-weight: 100; font-size: x-small;">Kwota:</div>
+    <div style="font-size: x-small;">Kwota:</div>
     <%= number_input f, :price, placeholder: 'Kwota', step: '0.01', required: "required" %>
-    <div style="font-weight: 100; font-size: x-small;">Opłacający:</div>
+    <div style="font-size: x-small;">Opłacający:</div>
     <%= select f, :payer, @users %>
 </label>
 <%= submit "Dodaj" %>
@@ -78,8 +78,8 @@
     <div class="column">
 
     <h2><%= Enum.at(bill,0) %>
-    </h2>Kwota: <div  class="text-frame" ><%= Enum.at(bill,1) %>   </div>
-        <div style="color:red;">   Osoby do podziału:
+    </h2> <div style="font-weight: 400;"> Kwota: <div  class="text-frame"><%= Enum.at(bill,1) %>   </div></div>
+        <div style="color:red; font-weight: 400;">   Osoby do podziału:
         <%= for user <- Enum.at(bill,2) do %>
         <%= if(elem(user, 1) == "true") do %>
             <div  class="text-frame" >
@@ -90,8 +90,8 @@
             <% end %>
          <% end %>
     </div>
-        <div style="color:blue;"> Opłacający:  <div  class="text-frame" ><%= Enum.at(bill,4)  %>   </div></div>
-        <div style="color:green;"> ID: <%= Enum.at(bill,3)  %></div>
+        <div style="color:blue; font-weight: 400;"> Opłacający:  <div  class="text-frame" ><%= Enum.at(bill,4)  %>   </div></div>
+        <div style="color:green; font-weight: 400;"> ID: <%= Enum.at(bill,3)  %></div>
 
     </div>
     <div class="column" style="width:10%">
