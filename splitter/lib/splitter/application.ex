@@ -9,7 +9,7 @@ defmodule Splitter.Application do
   def start(_type, _args) do
     children = [
       # Start the Ecto repository
-      Splitter.Repo,
+ #     Splitter.Repo,
       # Start the Telemetry supervisor
       SplitterWeb.Telemetry,
       # Start the PubSub system
