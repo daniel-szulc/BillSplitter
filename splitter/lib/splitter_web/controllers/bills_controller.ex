@@ -27,16 +27,6 @@ defmodule SplitterWeb.BillsController do
     HTTPoison.start_link()
   end
 
-  def get_request(url) do
-    Logger.info url
-
-    res = HTTPoison.get!(url)
-    Logger.info res.body
-    Logger.info res
-
-    res
-  end
-
   def getBillsForIndex(conn) do
         bills = get_session(conn, "bills")
           case bills do
@@ -201,20 +191,84 @@ defmodule SplitterWeb.BillsController do
       end
   end
 
+  def do_request(server, request, port) do
+    case :gen_tcp.connect(server, port, [:binary, active: false]) do
+      {:ok, socket} ->
+        :ok = :gen_tcp.send(socket, request)
+        response = :gen_tcp.recv(socket, 0)
+        :gen_tcp.close(socket)
+        response
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
   def splitBills(conn, params) do
 
-    list_string = createArray(conn)
-    response = get_request("http://localhost:4100/" <> list_string)
-    Logger.info response
-    Logger.info response
-    IO.inspect(response)
-    conn = Phoenix.Controller.put_flash(conn, :splitResult, response)
+    request = createArray(conn)
+    port=5700
+    server = {127, 0, 0, 1}
+    response = do_request(server, request, port)
+
+    array_string = elem(response,1)
+
+    array_list = String.replace(array_string, "]]", "")
+    array_list = String.replace(array_list, "[[", "")
+    array_list = String.split(array_list, "],[", include_delimiter: false)
+    IO.inspect("START SPLITTING")
+    IO.inspect(array_list)
+    array = Enum.map(array_list, fn x -> String.split(x, ",") end)
+
+    IO.inspect(array)
+    users = getUsers(conn)
+
+    users = if length(users) < 3 do
+      ["temp" | users]
+    else
+      users
+    end
+
+    result = arrayPaymentsCheck(array, length(array)-1, users, [])
+
+    conn = Phoenix.Controller.put_flash(conn, :splitResult,  result)
     Phoenix.Controller.redirect(conn, to: "/")
   end
+
+  def arrayPaymentsCheck(_, -1, _, result) do result end
+
+  def arrayPaymentsCheck(array, rowIndex, users, result) do
+      res = paymentCheck(length(array)-1, Enum.at(array, rowIndex), rowIndex, users, result)
+      arrayPaymentsCheck(array, rowIndex-1, users, res)
+    end
+
+  def paymentCheck(-1, _, _, _, result) do result end
+
+  def paymentCheck(colIndex, row, rowIndex, users, result) do
+    _result = case Enum.at(row, colIndex) do
+      "0" -> result
+      _ ->
+      if  rowIndex==colIndex do
+        result
+      else
+      from = Enum.at(users, colIndex)
+      to = Enum.at(users, rowIndex)
+      res = from <> " - " <> Enum.at(row, colIndex) <> " -> " <> to
+      [res | result]
+      end
+    end
+    paymentCheck(colIndex-1, row, rowIndex, users, _result)
+  end
+
 
 
   def createArray(conn) do
     users = getUsers(conn)
+    users = if length(users) < 3 do
+        ["temp" | users]
+      else
+      users
+    end
+
     bills = getBills(conn)
 
     indexes = length(users)

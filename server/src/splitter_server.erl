@@ -2,11 +2,11 @@
 -export([start/0, start/1]).
 -define(TIMEOUT, 20000).
 start() ->
-  start(5000).
+  start(5700).
 
 start(Port) ->
   io:fwrite("Server started on port ~p | http://localhost:~p/", [Port, Port] ),
-  spawn(fun () -> {ok, Sock} = gen_tcp:listen(Port, [{active, false}]),
+  spawn(fun () -> {ok, Sock} = gen_tcp:listen(Port, [binary, {packet, 0}, {active, false}]),
     loop(Sock) end).
 
 
@@ -22,11 +22,9 @@ loop(Sock) ->
 
 handle(Conn) ->
   {ok, A} = gen_tcp:recv(Conn,0),
-  Chunks = string:lexemes(A, " "),
-  io:fwrite("Zapytanie: ~p\n",[lists:nth(2, Chunks)]),
-
-  ListaString = lists:delete($/, lists:nth(2, Chunks)),
-  {BeforeRes, Response} = if ListaString /= "favicon.ico" ->
+  ListaString =  binary_to_list(A),
+  io:fwrite("Zapytanie: ~p\n",[ListaString]),
+  Response = if ListaString /= "favicon.ico" ->
   Lista = string:tokens(ListaString, ";"),
   RowsNumb = length(string:tokens(ListaString, ";")),
   ColNumb = length(string:tokens(lists:nth(1, Lista), ",")),
@@ -38,15 +36,14 @@ handle(Conn) ->
   io:fwrite( "Input Array:\n ~p \n\n", [Before]),
   Result = stringArray:arrayToString(ColNumb, RowsNumb, SplittedArray, "", 0),
   io:fwrite( "Output Array:\n ~p \n\n", [Result]),
-    {Before, Result};
-    true -> {"",""} end,
-
-  gen_tcp:send(Conn, response("Dane wejsciwowe:\n" ++ BeforeRes ++ "\n<br>\n" ++ "Wynik:\n" ++ Response)),
+    Result;
+    true -> "" end,
+ gen_tcp:send(Conn, Response),
   gen_tcp:close(Conn).
 
-response(Str) ->
-  B = iolist_to_binary(Str),
-  iolist_to_binary(
-    io_lib:fwrite(
-      "HTTP/1.0 200 OK\nContent-Type: text/html\nContent-Length: ~p\n\n~s",
-      [size(B), B])).
+%%response(Str) ->
+%%  B = iolist_to_binary(Str),
+%%  iolist_to_binary(
+%%    io_lib:fwrite(
+%%      "HTTP/1.0 200 OK\nContent-Type: text/html\nContent-Length: ~p\n\n~s",
+%%      [size(B), B])).

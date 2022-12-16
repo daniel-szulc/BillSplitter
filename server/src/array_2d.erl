@@ -2,7 +2,9 @@
 -export([new/2, get/3, set/4, getRow/2, countColumns/1, countRows/1]).
 
 new(Rows, Cols)->
+  io:fwrite("NEW ARRAY"),
   A = array:new(Rows),
+  io:fwrite("NEW ARRAY 2"),
   array:map(fun(_X, _T) -> array:new(Cols) end, A).
 
 get(RowI, ColI, A) ->
