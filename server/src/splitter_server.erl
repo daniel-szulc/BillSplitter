@@ -2,7 +2,7 @@
 -export([start/0, start/1]).
 -define(TIMEOUT, 20000).
 start() ->
-  start(4100).
+  start(5000).
 
 start(Port) ->
   io:fwrite("Server started on port ~p | http://localhost:~p/", [Port, Port] ),
@@ -40,7 +40,6 @@ handle(Conn) ->
   io:fwrite( "Output Array:\n ~p \n\n", [Result]),
     {Before, Result};
     true -> {"",""} end,
-
 
   gen_tcp:send(Conn, response("Dane wejsciwowe:\n" ++ BeforeRes ++ "\n<br>\n" ++ "Wynik:\n" ++ Response)),
   gen_tcp:close(Conn).
