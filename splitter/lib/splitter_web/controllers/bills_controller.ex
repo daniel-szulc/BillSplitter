@@ -54,7 +54,11 @@ defmodule SplitterWeb.BillsController do
 
     bills = getBills(conn)
 
-    value_exists = Enum.any?(bills, fn bill -> Enum.any?(Enum.at(bill,2), fn users ->  users == {id, "true"} end) end)  ||  Enum.any?(bills, fn bill -> Enum.at(bill,4)== id end)
+    value_exists = case bills do
+      nil -> false
+      _ ->  Enum.any?(bills, fn bill -> Enum.any?(Enum.at(bill,2), fn users ->  users == {id, "true"} end) end)  ||  Enum.any?(bills, fn bill -> Enum.at(bill,4)== id end)
+
+    end
 
     case value_exists do
       true ->
@@ -102,6 +106,11 @@ defmodule SplitterWeb.BillsController do
       _ ->
         List.delete_at(bills, selectedObj)
     end
+    newList = case length(newList) do
+      0 -> nil
+      _-> newList
+    end
+
     binary = :erlang.term_to_binary(newList)
     conn = put_session(conn, "bills", binary)
 
@@ -252,7 +261,9 @@ defmodule SplitterWeb.BillsController do
       else
       from = Enum.at(users, colIndex)
       to = Enum.at(users, rowIndex)
-      res = from <> " - " <> Enum.at(row, colIndex) <> " -> " <> to
+     # res = from <> " - " <> Enum.at(row, colIndex) <> " -> " <> to
+
+      res = {from, Enum.at(row, colIndex) , to}
       [res | result]
       end
     end

@@ -5,22 +5,30 @@
 <% end %>
 
 
+
 <%= if @bills do %>
 <%= if flash = get_flash(@conn, :splitResult) do %>
+<div style="text-align:center">
 <%= for fl <- get_flash(@conn, :splitResult) do %>
-<div> <%= fl %> </div>
+<div>  <div  class="text-frame" > <%= elem(fl,0) %></div> <div class="blockHead"><span class="blocktext"><%= elem(fl,1) %> </span></div><div  class="text-frame" ><%= elem(fl,2) %> </div></div>
 <% end %>
+</div>
 <hr>
 <% else %>
+<%= if length(@users)>1 do %>
 <div style="text-align:center">
 <%= link to: Routes.bills_path(@conn, :splitBills), method: :get, class: "btn btn-primary" do %>
 <button type="button">Oblicz
 </button>
-
-<% end %>
+    <% end %>
 </div>
 
 <hr>
+
+<% end %>
+
+
+
 <% end %>
 <% end %>
 <%= if @users do %>
