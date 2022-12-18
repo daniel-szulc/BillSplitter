@@ -221,6 +221,9 @@ defmodule SplitterWeb.BillsController do
 
     array_string = elem(response,1)
 
+    IO.inspect(array_string)
+
+
     array_list = String.replace(array_string, "]]", "")
     array_list = String.replace(array_list, "[[", "")
     array_list = String.split(array_list, "],[", include_delimiter: false)
