@@ -14,21 +14,15 @@
     <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
   </head>
   <body>
-    <header>
-      <section class="container">
-        <nav>
-          <ul>
-            <li><a href="https://hexdocs.pm/phoenix/overview.html">Get Started</a></li>
-            <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
-              <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
-            <% end %>
-          </ul>
-        </nav>
-        <a href="https://phoenixframework.org/" class="phx-logo">
-          <img src={Routes.static_path(@conn, "/images/phoenix.png")} alt="Phoenix Framework Logo"/>
-        </a>
-      </section>
-    </header>
+    <header style="text-align:right;">
+       <section class="container">
+       <div>
+           Made by:<br/>
+             <a href="https://github.com/daniel-szulc/" target="_blank">Daniel Szulc</a> & <a href="https://github.com/Mati-Wojtacha" target="_blank">Mateusz Wojtasiński</a>
+             </div>
+          <h1> <strong>BillSplitter</strong></h1>
+       </section>
+     </header>
     <%= @inner_content %>
   </body>
 </html>

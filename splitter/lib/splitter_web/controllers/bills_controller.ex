@@ -151,8 +151,6 @@ defmodule SplitterWeb.BillsController do
 
 
   def createUser(conn, %{"bill" => user_params}) do
-    Logger.info "New User"
-    Logger.info user_params
     user = user_params["user"]
 
     users = getUsers(conn)
@@ -191,9 +189,6 @@ defmodule SplitterWeb.BillsController do
         if elem(billUser, 1) == "true" do
           index = Enum.find_index(users, fn user -> to_string(user) == to_string(elem(billUser, 0)) end)
           new_array =  List.replace_at(array, payerIndex, List.replace_at(Enum.at(array,payerIndex), index,  Enum.at(Enum.at(array,payerIndex),index) + splitValue))
-          #  IO.inspect(to_string(elem(billUser, 0)) <> " {" <> to_string(index) <> "} " <> "wisi " <> "index:" <> to_string(payerIndex) <> " kwota:" <> to_string(splitValue))
-          # IO.inspect("payerIndex (col): " <> to_string(payerIndex) <> "  index (row): "<> to_string(index) <>  " current value: " <> to_string(Enum.at(Enum.at(array,index),payerIndex)) <>  " add value: " <> to_string(splitValue))
-
           calcArrayUsers(n-1, bill, users, payerIndex, splitValue, new_array)
           else
         calcArrayUsers(n-1, bill, users, payerIndex, splitValue, array)
@@ -221,17 +216,12 @@ defmodule SplitterWeb.BillsController do
 
     array_string = elem(response,1)
 
-    IO.inspect(array_string)
-
-
     array_list = String.replace(array_string, "]]", "")
     array_list = String.replace(array_list, "[[", "")
     array_list = String.split(array_list, "],[", include_delimiter: false)
-    IO.inspect("START SPLITTING")
-    IO.inspect(array_list)
+
     array = Enum.map(array_list, fn x -> String.split(x, ",") end)
 
-    IO.inspect(array)
     users = getUsers(conn)
 
     users = if length(users) < 3 do
@@ -290,9 +280,9 @@ defmodule SplitterWeb.BillsController do
     row = List.duplicate(0, indexes)
     array = List.duplicate(row, indexes)
     result= calcArrayBills(length(bills)-1, bills,users,array)
-    IO.inspect("ARRAY RESULT: ")
-    IO.inspect(result)
+
     list_string = inspect(result)
+
     list_string = String.replace(list_string, "], [", ";")
     list_string = String.replace(list_string, "]]", "")
     list_string = String.replace(list_string, "[[", "")
@@ -310,9 +300,7 @@ defmodule SplitterWeb.BillsController do
 
     checkboxes = Enum.map(users, fn user ->Map.get(bill_params, "checkbox_#{user}") end)
 
-
     usersToSplit = Enum.zip(users, checkboxes)
-
 
     anySelected = Enum.any?(usersToSplit, fn user ->  elem(user,1) ==  "true" end)
 
